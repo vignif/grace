@@ -1,0 +1,15 @@
+__pycache__/
+dist/
+**.pyc 
+.pytest_cache/
+.vscode/
+venv_engagement_layered/
+**.log
+build/
+devel/
+.catkin_tools/
+venv_tf/
+orocos_kinematics_dynamics/
+logs/
+**.egg-info/
+venv_engagement/
