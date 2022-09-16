@@ -1,4 +1,4 @@
-import quaternion as qt
+import quaternionic as qt
 import numpy as np
 from .mylog import Logger
 log = Logger(__name__, 30).logger
@@ -23,16 +23,12 @@ class Agent:
         assert len(self.position) == 3, "wrong size of agent pose"
         assert len(orientation) == 4, "wrong size of agent orientation"
 
-        self.orientation = qt.quaternion()
-        self.orientation.x = orientation[0]
-        self.orientation.y = orientation[1]
-        self.orientation.z = orientation[2]
-        self.orientation.w = orientation[3]
+        self.orientation = qt.array([orientation[3], orientation[0], orientation[1], orientation[2]])
         
         norm = np.linalg.norm([self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w])
         assert np.isclose(norm, 1.0), f"Quaternion norm is {norm} and not 1.0"
         
-        self.rpy = qt.as_euler_angles(self.orientation)
+        self.rpy = self.orientation.to_euler_angles
         self.params = {}
         self.WtE = {}
         self.angle = None
