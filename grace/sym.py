@@ -61,7 +61,7 @@ class GaussianModel:
         if len(intersection) == 1:
             itx = intersection[0][x]
         else:
-            log.warning(f'intersection: {intersection}')
+            log.debug(f'intersection: {intersection}')
 
         log.debug(f'standard itx: {itx}')
         return itx
@@ -71,7 +71,7 @@ class GaussianModel:
         closed_form = (self.m1**2 - self.m2**2) / 2 * (self.m1 - self.m2)
         f = exp(-1 / 2 * (x - self.m1)**2)
         ity = f.subs(x, closed_form)
-        log.warning(f'closed ity: {ity}')
+        log.debug(f'closed ity: {ity}')
         if ity < 1e-10:
             ity = 0.0
         return round(ity, FLOAT_PRECISION)
