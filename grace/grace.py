@@ -3,14 +3,13 @@ from abc import ABC, abstractmethod
 # from engagement import Agent, Status
 import numpy as np
 import quaternion as qt
-from .np_utils import angle_between_vectors, RotMat, rotation_matrix_from_vectors, q_from_matrix
+from .np_utils import angle_between_vectors
 from .agent import Agent
 
 from .sym import GaussianModel
 
 from .mylog import Logger
 log = Logger(__name__).logger
-
 
 
 def gauss(mean):
@@ -45,29 +44,25 @@ class GazeFeature(IFeature):
         compute WtE of A and B
         return both WtEs
         """
-        mean = 0
-        # print(f"compute gaze")
 
         p_a = self.A.position
-        o_a = qt.quaternion(*np.roll(self.A.orientation,1))
-        # o_a = np.roll(o_a, 1)
-        p_b = self.B.position
-        o_b = qt.quaternion(*np.roll(self.B.orientation,1))
-        # o_b = np.roll(o_b, 2)
-        vec_a2b = np.array(p_b - p_a)
-        vec_b2a = -vec_a2b
-        log.warning(f'o_a {o_a}')
-        log.warning(f'o_b {o_b}')
-        rot_a2b = qt.rotate_vectors(o_a, vec_a2b)
-        rot_b2a = qt.rotate_vectors(o_b, vec_b2a)
-        log.warning(f'rot_a2b {rot_a2b}')
-        log.warning(f'rot_b2a {rot_b2a}')
-        
-        A_gaze_angle = angle_between_vectors([1,0,0], -rot_a2b)
-        B_gaze_angle = angle_between_vectors([1,0,0], rot_b2a)
+        o_a = self.A.orientation
 
-        log.debug(f"{self.A.name}'s gaze is {A_gaze_angle} far from {self.B.name}'s position")
-        log.debug(f"{self.B.name}'s gaze is {B_gaze_angle} far from {self.A.name}'s position")
+        p_b = self.B.position
+        o_b = self.B.orientation
+
+        vec_a2b = np.array(p_b - p_a)
+        vec_b2a = -vec_a2b  # position of a wrt b
+        log.debug(f'o_a {o_a}')
+        log.debug(f'o_b {o_b}')
+
+        B_gaze_angle = angle_between_vectors(vec_b2a, o_b.rotate([1, 0, 0]))
+        A_gaze_angle = angle_between_vectors(vec_a2b, o_a.rotate([1, 0, 0]))
+
+        log.debug(
+            f"{self.A.name}'s gaze is {A_gaze_angle} far from {self.B.name}'s position")
+        log.debug(
+            f"{self.B.name}'s gaze is {B_gaze_angle} far from {self.A.name}'s position")
 
         m1 = angle2shift(-1, A_gaze_angle)
         m2 = angle2shift(1, B_gaze_angle)
@@ -111,7 +106,8 @@ class FeatureHandler(IFeature):
         """compute and assign WtE of each feature to each agent"""
         for f in self.available_features:
             if f["Feature"].compute():
-                log.info(f'{f["Feature"].name} computed with value {f["Feature"].G.value}')
+                log.info(
+                    f'{f["Feature"].name} computed with value {f["Feature"].G.value}')
             else:
                 log.debug(f'Error in WtE {f["Feature"].name}!')
 
@@ -123,11 +119,12 @@ class Interaction:
         self.intersections = {}
         if len(self.feature_handler.available_features) == 0:
             raise Exception("Interaction requires at least one feature")
-        
+
         for feature in self.feature_handler.available_features:
-            if not hasattr(feature["Feature"],'G'):
+            if not hasattr(feature["Feature"], 'G'):
                 log.warning("Feature has no GaussianModel computed")
-                raise Exception(f"GaussianModel not found in feature {feature['Feature'].name} \n Did you forget to call feature.compute() ?")
+                raise Exception(
+                    f"GaussianModel not found in feature {feature['Feature'].name} \n Did you forget to call feature.compute() ?")
 
     def compute(self):
         for f in self.feature_handler.available_features:
@@ -172,7 +169,8 @@ class Interaction:
             # status_interaction[0] = Status.ERROR
         print()
 
-def run_default(agent_A: Agent, agent_B:Agent):
+
+def run_default(agent_A: Agent, agent_B: Agent):
     # create feature handler
     fh = FeatureHandler(agent_A, agent_B)
     # add features
@@ -184,6 +182,7 @@ def run_default(agent_A: Agent, agent_B:Agent):
     interaction = Interaction(fh)
     # compute engagement
     return interaction.compute()
+
 
 def run(human, robot):
     # position wrt to world
@@ -215,4 +214,5 @@ if __name__ == "__main__":
     run(([0, 0, 0], [0, 0, 0.5, 0.5]), ([0, 1.5, 0], [0, 0, 0, 1]))
 
 
-__all__ = ["Interaction", "FeatureHandler", "IFeature", "GazeFeature", "ProximityFeature", "Agent"]
+__all__ = ["Interaction", "FeatureHandler", "IFeature",
+           "GazeFeature", "ProximityFeature", "Agent"]
