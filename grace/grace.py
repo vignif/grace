@@ -77,11 +77,9 @@ class ProximityFeature(IFeature):
 
     def compute(self):
         # print(f"compute prox")
-        distance = np.linalg.norm(self.A.position - self.B.position)
+        m1 = np.linalg.norm(self.A.position - self.B.position) - self.epsilon
+        m2 = 0.0
 
-        m1 = np.linalg.norm(self.A.position)
-        log.debug(f"distance: {distance}")
-        m2 = abs(distance - self.epsilon)
         log.debug(f"m1: {m1}, m2: {m2}")
         self.G = GaussianModel(m1, m2)
         return True
