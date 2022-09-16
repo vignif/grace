@@ -32,13 +32,31 @@ log = logging.getLogger(__name__)
 
 class TestAgent(unittest.TestCase):
     def setUp(self):
-        self.agentA = Agent("first agent", [1, 2, 3], [0, 0, 0, 1])
+        self.agentA = Agent("A", [1, 2, 3], [0, 0, 0, 1])
+        self.agentB = Agent("B", [1, 2, 3], [1/np.sqrt(2), 1/np.sqrt(2), 0, 0])
 
     def tearDown(self):
-        log.debug(f'deleting agent: {self.agentA.name}')
+        pass
+        # log.debug(f'deleting agent: {self.agentA.name}')
 
-    def test_agentA_writes_file(self):
-        log.debug("test function")
+    def test_str_agents(self):
+        log.info(self.id().split('.')[-1])
+        log.info(self.agentA)
+        log.info(self.agentB)
+
+    def test_quaternion_is_not_unitary(self):
+        log.info(self.id().split('.')[-1])
+        self.assertRaises(AssertionError, Agent, "C", [1, 2, 3], [0, 0, 1, 1])
+
+    def test_position_wrong(self):
+        log.info(self.id().split('.')[-1])
+        self.assertRaises(AssertionError, Agent, "C", [1, 2], [0, 0, 0, 1])
+        self.assertRaises(AssertionError, Agent, "C", [1, 2, 3, 4], [0, 0, 0, 1])
+
+    def test_wrong_arguments(self):
+        log.info(self.id().split('.')[-1])
+        self.assertRaises(ValueError, Agent, "C", [1, 2, 3], [0, 0, 0, 1], 1)
+        self.assertRaises(ValueError, Agent, "C", [1, 2, 3], [0, 0, 0, 1], 1, 1)
 
 
 # class TestMath(unittest.TestCase):
