@@ -126,6 +126,51 @@ class TestGaze(unittest.TestCase):
         log.info(f'Engagement: {eng:.3f}')
         self.assertEqual(eng, 0.0)
 
+class TestProximity(unittest.TestCase):
+    def setUp(self):
+        log.debug("creating common resources")
+
+    def tearDown(self):
+        log.debug("tearing down common resources")
+
+    def get_prox_eng(self, pose_H, pose_R):
+        Human = Agent("Human", pose_H)
+        Robot = Agent("Robot", pose_R)
+        P = ProximityFeature(Human, Robot)
+        F = FeatureHandler(Human, Robot)
+        F.add(P, 1.0)
+        F.compute()
+        I = Interaction(F)
+        eng = I.compute()
+        return eng
+    
+    def test_complete(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([1.5, 2, 0]), ([0, 0, 1, 0])
+        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
+        eng = self.get_prox_eng(pose_H, pose_R)
+        log.info(f'Engagement: {eng:.3f}')
+        self.assertAlmostEqual(eng, 1.0, places=2)
+    
+    def test_varying_proxemics_xy(self):
+        log.info(self.id().split('.')[-1])
+
+        pose_H = ([4, 2, 0]), ([0, 0, 1, 0])
+        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
+
+        a_pos_x = np.arange(-10.0, 10.0, 0.5)
+        engs_x = []
+        for x in a_pos_x:
+            pose_R = ([x, 6, 0]), ([0, 0, 0, 1])
+            eng = self.get_prox_eng(pose_H=pose_H, pose_R=pose_R)
+            engs_x.append(eng)
+        
+        log.info(max(engs_x))
+        # for n in engs_x:
+            # log.info(round(n, 3))
+        # self.assertAlmostEqual(engs_x, engs_y, places=2)
+        # engs_x and engs_y should be the same and have two peaks (social agents are in the ideal distance 2 times)
+
 
 class TestInteraction(unittest.TestCase):
     def setUp(self):
@@ -222,40 +267,6 @@ class TestInteraction(unittest.TestCase):
         eng = I.compute()
         log.info(f'Engagement: {eng:.3f}')
         self.assertAlmostEqual(eng, 1.0, places=2)
-
-    def test_varying_proxemics_xy(self):
-        log.info(self.id().split('.')[-1])
-        a_pos_x = np.arange(-10.0, 10.0, 0.5)
-        engs_x = []
-        for x in a_pos_x:
-            self.B.position = [x, 0, 0]
-
-            P = ProximityFeature(self.A, self.B)
-            P.epsilon = 1.5
-            # feature handler
-            F = FeatureHandler(self.A, self.B)
-            F.add(P, 1.0)
-
-            F.compute()
-            I = Interaction(F)
-            eng = I.compute()
-            engs_x.append(eng)
-        engs_y = []
-        for y in a_pos_x:
-            self.B.position = [0, y, 0]
-
-            P = ProximityFeature(self.A, self.B)
-            P.epsilon = 1.5
-            # feature handler
-            F = FeatureHandler(self.A, self.B)
-            F.add(P, 1.0)
-
-            F.compute()
-            I = Interaction(F)
-            eng = I.compute()
-            engs_y.append(eng)
-        self.assertAlmostEqual(engs_x, engs_y, places=2)
-        # engs_x and engs_y should be the same and have two peaks (social agents are in the ideal distance 2 times)
 
 
 #     def test_fail_on_same_location(self):
