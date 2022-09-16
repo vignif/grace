@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import logging
 from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run
-import quaternion as qt
+import quaternionic as qt
 import os
 import sys
 os.path.join(os.path.dirname(__file__), '../')
@@ -21,6 +21,9 @@ plt_logger.setLevel(logging.WARNING)
 
 eng_logger = logging.getLogger("engagement")
 eng_logger.setLevel(logging.WARNING)
+
+quat_logger = logging.getLogger("numba")
+quat_logger.setLevel(logging.WARNING)
 
 log = logging.getLogger(__name__)
 
@@ -73,10 +76,59 @@ class TestAgent(unittest.TestCase):
 #     def test_angle_between_vectors(self):
 #         pass
 
+class TestGaze(unittest.TestCase):
+    def setUp(self):
+        log.debug("creating common resources")
+
+    def tearDown(self):
+        log.debug("tearing down common resources")
+
+    def get_gaze_eng(self, pose_H, pose_R):
+        Human = Agent("Human", pose_H)
+        Robot = Agent("Robot", pose_R)
+        G = GazeFeature(Human, Robot)
+        F = FeatureHandler(Human, Robot)
+        F.add(G, 1.0)
+        F.compute()
+        I = Interaction(F)
+        eng = I.compute()
+        return eng
+
+    def test_full_mutual_gaze(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([3, 2, 0]), ([0, 0, 1, 0])
+        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
+        eng = self.get_gaze_eng(pose_H, pose_R)
+        log.info(f'Engagement: {eng:.3f}')
+        self.assertAlmostEqual(eng, 1.0, places=2)
+
+    def test_only_robot_full(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([3, 2, 0]), ([0, 0, 0, 1])
+        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
+        eng = self.get_gaze_eng(pose_H, pose_R)
+        log.info(f'Engagement: {eng:.3f}')
+        self.assertLess(eng, 1.0)
+
+    def test_human_full(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([3, 2, 0]), ([0, 0, 1, 0])
+        pose_R = ([0, 2, 0]), ([0, 1, 0, 0])
+        eng = self.get_gaze_eng(pose_H, pose_R)
+        log.info(f'Engagement: {eng:.3f}')
+        self.assertLess(eng, 1.0)
+
+    def test_zero_gaze(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([3, 2, 0]), ([0, 0, 0, 1])
+        pose_R = ([0, 2, 0]), ([0, 0, 1, 0])
+        eng = self.get_gaze_eng(pose_H, pose_R)
+        log.info(f'Engagement: {eng:.3f}')
+        self.assertEqual(eng, 0.0)
+
 
 class TestInteraction(unittest.TestCase):
     def setUp(self):
-        # log.debug("creating common resources")
         default_pose_A = ([0, 0, 0]), ([0, 0, 0, 1])
         default_pose_B = ([1, 1, 0]), ([0, 0, 0, 1])
         self.A = Agent(" A", default_pose_A)
@@ -145,20 +197,8 @@ class TestInteraction(unittest.TestCase):
     def test_zero_gaze(self):
         log.info(self.id().split('.')[-1])
         self.B.position = [3, 0, 0]
-
         G = GazeFeature(self.A, self.B)
-
-        # feature handler
-        F = FeatureHandler(self.A, self.B)
-        F.add(G, 1.0)
-        F.compute()
-
-    def test_full_gaze(self):
-        log.info(self.id().split('.')[-1])
-        self.B.position = [3, 0, 0]
-        self.B.orientation = [0, 0, 1, 0]
-
-        G = GazeFeature(self.A, self.B)
+        
         # feature handler
         F = FeatureHandler(self.A, self.B)
         F.add(G, 1.0)
@@ -166,25 +206,6 @@ class TestInteraction(unittest.TestCase):
         I = Interaction(F)
         eng = I.compute()
         log.info(f'Engagement: {eng:.3f}')
-        self.assertAlmostEqual(eng, 1.0, places=2)
-
-    def test_weighted_full_gaze(self):
-        log.info(self.id().split('.')[-1])
-        self.B.position = [3, 0, 0]
-        self.B.orientation = [0, 0, 1, 0]
-        P = ProximityFeature(self.A, self.B)
-        P.epsilon = np.sqrt(2)
-        G = GazeFeature(self.A, self.B)
-
-        # feature handler
-        F = FeatureHandler(self.A, self.B)
-        F.add(P, 0.0)
-        F.add(G, 1.0)
-        F.compute()
-        I = Interaction(F)
-        eng = I.compute()
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertAlmostEqual(eng, 1.0, places=2)
 
     def test_weighted_full_proxemics(self):
         log.info(self.id().split('.')[-1])
