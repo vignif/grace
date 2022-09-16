@@ -43,17 +43,24 @@ class GaussianModel:
         self.itx = None
         self.ity = None
 
-        # self.closed_form()
-        if method == "closed":
-            self.ity = self.closed_form()
-        elif method == "standard":
-            self.itx = self.standard_form()
-            log.debug(f'itx: {self.itx}')
-            self.ity = self.get_y_val()
-        else:
-            raise ValueError("method must be 'closed' or 'standard'")
+        if np.isclose(self.m1, self.m2):
+            self.same_means()
+
+        if self.itx is None or self.ity is None:
+            if method == "closed":
+                self.ity = self.closed_form()
+            elif method == "standard":
+                self.itx = self.standard_form()
+                log.debug(f'itx: {self.itx}')
+                self.ity = self.get_y_val()
+            else:
+                raise ValueError("method must be 'closed' or 'standard'")
         log.info(f'value: {self.ity}')
         self.value = self.ity
+
+    def same_means(self):
+        self.itx = self.m1
+        self.ity = 1.0
 
     def standard_form(self):
         eq = Eq(self.f1, self.f2)
@@ -68,7 +75,7 @@ class GaussianModel:
 
     def closed_form(self):
         #NOT USE YET
-        closed_form = (self.m1**2 - self.m2**2) / 2 * (self.m1 - self.m2)
+        closed_form = (self.m1**2 - self.m2**2) / (2 * (self.m1 - self.m2))
         f = exp(-1 / 2 * (x - self.m1)**2)
         ity = f.subs(x, closed_form)
         log.debug(f'closed ity: {ity}')
