@@ -3,7 +3,6 @@ dist/
 **.pyc 
 .pytest_cache/
 .vscode/
-venv_engagement_layered/
 **.log
 build/
 devel/
@@ -12,4 +11,4 @@ venv_tf/
 orocos_kinematics_dynamics/
 logs/
 **.egg-info/
-venv_engagement/
+venv_*/
