@@ -58,7 +58,6 @@ class Agent:
     def angle(self, value):
         # assert len(value) == 1, "wrong size of value"
         log.debug(f"setter of angle of {self.name} to {value}")
-        self._angle = check_is_radians(value)
 
     @angle.deleter
     def angle(self):
@@ -78,12 +77,3 @@ class Agent:
         for f in self.features_:
             log.debug(f"Set {f.name} to {self.params[f.name]}")
             self.WtE[f.name] = f.value(self.params[f.name])
-
-def check_is_radians(angle):
-    pass
-    # if angle >= -2 * np.pi and angle <= 2 * np.pi:
-        # log.debug(f"angle is in radians")
-    # else:
-        # raise ValueError(f"angle must be provided in radians!")
-    # return angle
-
