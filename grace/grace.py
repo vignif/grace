@@ -1,6 +1,11 @@
+"""
+GRACE GeometRic ApproaCh to mutual Engagement
+
+Author: Francesco Vigni
+"""
+
 from abc import ABC, abstractmethod
 
-# from engagement import Agent, Status
 import numpy as np
 import quaternion as qt
 from .np_utils import angle_between_vectors
@@ -10,11 +15,6 @@ from .sym import GaussianModel
 
 from .mylog import Logger
 log = Logger(__name__).logger
-
-
-def gauss(mean):
-    x = np.arange(-100, 100, 0.1)
-    return np.exp(-np.square(x + mean) / 2)
 
 
 def angle2shift(sign, val):
