@@ -1,3 +1,4 @@
+import quaternion as qt
 import numpy as np
 from .mylog import Logger
 log = Logger(__name__, 30).logger
@@ -5,25 +6,41 @@ log = Logger(__name__, 30).logger
 
 class Agent:
     """Create an agent
-    pose2d = [x, y, alpha]
+    orientation using quaternion library provide input as [x,y,z,w]
     """
+
     def __init__(self, name, *args):
         log.debug(f"Init create Agent {name}")
         self.name = name
         if len(args) == 2:
             self.position = np.array(args[0])
-            self.orientation = np.array(args[1])
+            orientation = np.array(args[1])
         elif len(args) == 1:
-            self.position, self.orientation = np.array(args[0], dtype=object)
+            self.position, orientation = np.array(args[0], dtype=object)
         else:
-            log.warning("Wrong number of arguments")
-    
+            raise ValueError("Wrong number of arguments")
+            
+        assert len(self.position) == 3, "wrong size of agent pose"
+        assert len(orientation) == 4, "wrong size of agent orientation"
+
+        self.orientation = qt.quaternion()
+        self.orientation.x = orientation[0]
+        self.orientation.y = orientation[1]
+        self.orientation.z = orientation[2]
+        self.orientation.w = orientation[3]
+        
+        norm = np.linalg.norm([self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w])
+        assert np.isclose(norm, 1.0), f"Quaternion norm is {norm} and not 1.0"
+        
+        self.rpy = qt.as_euler_angles(self.orientation)
         self.params = {}
         self.WtE = {}
-        assert len(self.position) == 3, "wrong size of agent pose"
         self.angle = None
         self._pose = None
         log.debug(f"Finish create Agent {name}")
+
+    def __str__(self):
+        return f'Agent: {self.name} - {self.position} -  [x:{self.orientation.x} y:{self.orientation.y} z:{self.orientation.z} w:{self.orientation.w}] - rpy: {self.rpy}'
 
     @property
     def mag(self):
