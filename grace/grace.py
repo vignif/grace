@@ -7,7 +7,6 @@ Author: Francesco Vigni
 from abc import ABC, abstractmethod
 
 import numpy as np
-import quaternion as qt
 from .np_utils import angle_between_vectors
 from .agent import Agent
 
