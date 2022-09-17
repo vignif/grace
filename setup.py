@@ -10,5 +10,5 @@ setup(
     packages=find_packages(),
     package_dir={"": "."},
     install_requires=['numpy >= 1.11.1', 'matplotlib >= 1.5.1',
-                      'sympy >= 1.1.1', 'numpy-quaternion >= 2022.4.2'],
+                      'sympy >= 1.1.1', 'quaternionic >= 1.0.5'],
 )
