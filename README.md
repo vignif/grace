@@ -16,3 +16,7 @@ source venv_grace/bin/activate
 pip setup.py install
 ```
 
+## Ros wrapper
+
+A wrapper for ros noetic is available at [https://github.com/vignif/grace_ros](https://github.com/vignif/grace_ros)
+
