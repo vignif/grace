@@ -54,27 +54,15 @@ class TestAgent(unittest.TestCase):
     def test_position_wrong(self):
         log.info(self.id().split('.')[-1])
         self.assertRaises(AssertionError, Agent, "C", [1, 2], [0, 0, 0, 1])
-        self.assertRaises(AssertionError, Agent, "C", [1, 2, 3, 4], [0, 0, 0, 1])
+        self.assertRaises(AssertionError, Agent, "C",
+                          [1, 2, 3, 4], [0, 0, 0, 1])
 
     def test_wrong_arguments(self):
         log.info(self.id().split('.')[-1])
         self.assertRaises(ValueError, Agent, "C", [1, 2, 3], [0, 0, 0, 1], 1)
-        self.assertRaises(ValueError, Agent, "C", [1, 2, 3], [0, 0, 0, 1], 1, 1)
+        self.assertRaises(ValueError, Agent, "C", [
+                          1, 2, 3], [0, 0, 0, 1], 1, 1)
 
-
-# class TestMath(unittest.TestCase):
-#     def setUp(self):
-#         log.debug("init test math")
-
-#     def test_rotation_matrix(self):
-#         # with relative tolerance
-#         for angle in np.arange(0, 2 * np.pi, 0.01):
-#             assert np.allclose(
-#                 np.linalg.inv(e.RotMat(angle)), e.RotMat(angle).transpose(), rtol=1e-10
-#             ), f"Invalid Rot Matrix for angle {angle}"
-
-#     def test_angle_between_vectors(self):
-#         pass
 
 class TestGaze(unittest.TestCase):
     def setUp(self):
@@ -126,6 +114,7 @@ class TestGaze(unittest.TestCase):
         log.info(f'Engagement: {eng:.3f}')
         self.assertEqual(eng, 0.0)
 
+
 class TestProximity(unittest.TestCase):
     def setUp(self):
         log.debug("creating common resources")
@@ -143,7 +132,7 @@ class TestProximity(unittest.TestCase):
         I = Interaction(F)
         eng = I.compute()
         return eng
-    
+
     def test_complete(self):
         log.info(self.id().split('.')[-1])
         pose_H = ([1.5, 2, 0]), ([0, 0, 1, 0])
@@ -151,7 +140,7 @@ class TestProximity(unittest.TestCase):
         eng = self.get_prox_eng(pose_H, pose_R)
         log.info(f'Engagement: {eng:.3f}')
         self.assertAlmostEqual(eng, 1.0, places=2)
-    
+
     def test_varying_proxemics_xy(self):
         log.info(self.id().split('.')[-1])
 
@@ -164,12 +153,15 @@ class TestProximity(unittest.TestCase):
             pose_R = ([x, 6, 0]), ([0, 0, 0, 1])
             eng = self.get_prox_eng(pose_H=pose_H, pose_R=pose_R)
             engs_x.append(eng)
-        
+
         log.info(max(engs_x))
-        # for n in engs_x:
-            # log.info(round(n, 3))
-        # self.assertAlmostEqual(engs_x, engs_y, places=2)
-        # engs_x and engs_y should be the same and have two peaks (social agents are in the ideal distance 2 times)
+
+    def test_same_location(self):
+        log.info(self.id().split('.')[-1])
+        pose_H = ([-2, 2, 4]), ([0, 0, 1, 0])
+        pose_R = ([-2, 2, 4]), ([0, 0, 0, 1])
+
+        self.assertRaises(ValueError, self.get_prox_eng, pose_H, pose_R)
 
 
 class TestInteraction(unittest.TestCase):
@@ -243,7 +235,7 @@ class TestInteraction(unittest.TestCase):
         log.info(self.id().split('.')[-1])
         self.B.position = [3, 0, 0]
         G = GazeFeature(self.A, self.B)
-        
+
         # feature handler
         F = FeatureHandler(self.A, self.B)
         F.add(G, 1.0)
@@ -268,6 +260,24 @@ class TestInteraction(unittest.TestCase):
         log.info(f'Engagement: {eng:.3f}')
         self.assertAlmostEqual(eng, 1.0, places=2)
 
+
+class TestParameters(unittest.TestCase):
+    def setUp(self):
+        log.debug("creating common resources")
+
+    def tearDown(self):
+        log.debug("tearing down common resources")
+
+    def test_prox_params(self):
+        log.info(self.id().split('.')[-1])
+        A = Agent(" A", ([0, 0, 0]), ([0, 0, 0, 1]))
+        B = Agent(" B", ([1, 1, 0]), ([0, 0, 0, 1]))
+        P = ProximityFeature(A, B)
+        P.epsilon = np.sqrt(2)
+        self.assertAlmostEqual(P.epsilon, 1.414, places=3)
+
+        G = GazeFeature(A, B)
+        self.assertTrue(np.array_equal(G.gaze_axis, np.array([1, 0, 0])))
 
 #     def test_fail_on_same_location(self):
 #         log.info(self.id().split('.')[-1])
@@ -397,6 +407,3 @@ class TestInteraction(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-############ TODO #############
-# why is there noise in the peak in test_B_goes_around_A when B has a big difference in angle?

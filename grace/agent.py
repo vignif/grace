@@ -19,15 +19,17 @@ class Agent:
             self.position, orientation = np.array(args[0], dtype=object)
         else:
             raise ValueError("Wrong number of arguments")
-            
+
         assert len(self.position) == 3, "wrong size of agent pose"
         assert len(orientation) == 4, "wrong size of agent orientation"
 
-        self.orientation = qt.array([orientation[3], orientation[0], orientation[1], orientation[2]])
-        
-        norm = np.linalg.norm([self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w])
+        self.orientation = qt.array(
+            [orientation[3], orientation[0], orientation[1], orientation[2]])
+
+        norm = np.linalg.norm(
+            [self.orientation.x, self.orientation.y, self.orientation.z, self.orientation.w])
         assert np.isclose(norm, 1.0), f"Quaternion norm is {norm} and not 1.0"
-        
+
         self.rpy = self.orientation.to_euler_angles
         self.params = {}
         self.WtE = {}

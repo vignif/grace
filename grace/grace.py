@@ -38,11 +38,13 @@ class IFeature(ABC):
 
 
 class GazeFeature(IFeature):
+    # TODO: add a parameter to set the angle of the cone
+
+    # gaze_axis is the x component of the pose
+    gaze_axis = np.array([1, 0, 0])
 
     def compute(self):
-        """
-        compute WtE of A and B
-        return both WtEs
+        """Compute the gaze feature
         """
 
         p_a = self.A.position
@@ -56,8 +58,10 @@ class GazeFeature(IFeature):
         log.debug(f'o_a {o_a}')
         log.debug(f'o_b {o_b}')
 
-        B_gaze_angle = angle_between_vectors(vec_b2a, o_b.rotate([1, 0, 0]))
-        A_gaze_angle = angle_between_vectors(vec_a2b, o_a.rotate([1, 0, 0]))
+        B_gaze_angle = angle_between_vectors(
+            vec_b2a, o_b.rotate(self.gaze_axis))
+        A_gaze_angle = angle_between_vectors(
+            vec_a2b, o_a.rotate(self.gaze_axis))
 
         log.debug(
             f"{self.A.name}'s gaze is {A_gaze_angle} far from {self.B.name}'s position")
@@ -73,10 +77,20 @@ class GazeFeature(IFeature):
 
 
 class ProximityFeature(IFeature):
+    # TODO: epsilon as function of time
+
+    # epsilon is ideal interaction distance
     epsilon = 1.5
 
+    def __init__(self, A: Agent, B: Agent):
+        super().__init__(A, B)
+        if np.array_equal(self.A.position, self.B.position):
+            raise ValueError(
+                f"{self.A.name} and {self.B.name} are on the same location")
+
     def compute(self):
-        # print(f"compute prox")
+        """Compute the proximity feature
+        """
         m1 = np.linalg.norm(self.A.position - self.B.position) - self.epsilon
         m2 = 0.0
 
@@ -88,12 +102,13 @@ class ProximityFeature(IFeature):
 class FeatureHandler(IFeature):
 
     def __init__(self, A, B):
-        # assign agents to base class
+        """Assign agents to base class
+        """
         super().__init__(A, B)
         self.available_features = []
 
     def add(self, feature, weight):
-        # log.debug(weight)
+        """add a feature to the list of available features"""
         if isinstance(feature, IFeature):
             self.available_features.append({
                 "Feature": feature,
@@ -135,7 +150,6 @@ class Interaction:
     def engagement(self):
 
         values = list(self.intersections.values())
-        # log.debug(self.intersections)
         partial_eng = [row[0] for row in values]
         weights = [row[1] for row in values]
         engagement = np.average(partial_eng, axis=0, weights=weights)

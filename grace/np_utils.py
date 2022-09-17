@@ -1,6 +1,12 @@
 import numpy as np
 from math import atan2, sin, cos
 
+import quaternion as qt
+
+
+def inverse_quaternion(q):
+    return qt.quaternion(q.w, -q.x, -q.y, -q.z)
+
 
 def angle_between_vectors(v1, v2):
     """Returns the angle in radians between vectors 'v1' and 'v2'::

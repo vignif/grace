@@ -25,6 +25,7 @@ log = Logger(__name__, logging.WARNING).logger
 x = symbols('x')
 FLOAT_PRECISION = 10
 
+
 class GaussianModel:
     def __init__(self, mean1, mean2, method="closed"):
         """_summary_
@@ -74,7 +75,7 @@ class GaussianModel:
         return itx
 
     def closed_form(self):
-        #NOT USE YET
+        # NOT USE YET
         closed_form = (self.m1**2 - self.m2**2) / (2 * (self.m1 - self.m2))
         f = exp(-1 / 2 * (x - self.m1)**2)
         ity = f.subs(x, closed_form)
