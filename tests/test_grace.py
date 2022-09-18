@@ -2,7 +2,6 @@ import numpy as np
 import unittest
 import logging
 from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run
-import quaternionic as qt
 import os
 import sys
 os.path.join(os.path.dirname(__file__), '../')
@@ -179,12 +178,9 @@ class TestInteraction(unittest.TestCase):
         log.info(self.id().split('.')[-1])
         P = ProximityFeature(self.A, self.B)
         P.epsilon = np.sqrt(2)
-        G = GazeFeature(self.A, self.B)
-
         # feature handler
         F = FeatureHandler(self.A, self.B)
         F.add(P, 1.0)
-        F.add(G, 1.0)
         F.compute()
 
         I = Interaction(F)

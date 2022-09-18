@@ -11,12 +11,11 @@ Returns:
 """
 
 from __future__ import division
-from sympy import symbols, solve, Eq, Function, exp, lambdify, solveset, nonlinsolve
+from sympy import symbols, solve, Eq, exp, lambdify
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import logging
-import sys
 
 from .mylog import Logger
 log = Logger(__name__, logging.WARNING).logger

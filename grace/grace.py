@@ -29,11 +29,10 @@ class IFeature(ABC):
         self.name = self.__class__.__name__
 
     @abstractmethod
-    def compute():
+    def compute(self):
         """Implemented in child
         assign to each agent the WtE of the feature
         """
-        pass
 
 
 class GazeFeature(IFeature):
