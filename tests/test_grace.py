@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 import logging
-from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run
+from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run, run_default
 import os
 import sys
 os.path.join(os.path.dirname(__file__), '../')
@@ -226,6 +226,12 @@ class TestInteraction(unittest.TestCase):
     def test_run(self):
         run((self.A.position, self.A.orientation),
             (self.B.position, self.B.orientation))
+
+    def test_run_default(self):
+        A = Agent("A", ([0, 0, 0]), ([0, 0, 0, 1]))
+        B = Agent("B", ([1, 1, 0]), ([0, 0, 0, 1]))
+        eng = run_default(A, B)
+        self.assertGreater(eng, 0.0)
 
     def test_zero_gaze(self):
         log.info(self.id().split('.')[-1])
