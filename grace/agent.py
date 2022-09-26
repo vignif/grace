@@ -73,6 +73,7 @@ class Agent:
     def angle(self, value):
         # assert len(value) == 1, "wrong size of value"
         log.debug(f"setter of angle of {self.name} to {value}")
+        self._angle = value
 
     @angle.deleter
     def angle(self):
