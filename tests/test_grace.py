@@ -62,6 +62,21 @@ class TestAgent(unittest.TestCase):
         self.assertRaises(ValueError, Agent, "C", [
                           1, 2, 3], [0, 0, 0, 1], 1, 1)
 
+    def test_mag_position(self):
+        log.info(self.id().split('.')[-1])
+        self.assertEqual(self.agentA.mag, np.linalg.norm(self.agentA.position))
+        self.assertEqual(self.agentB.mag, np.linalg.norm(self.agentB.position))
+
+    def test_delete_position(self):
+        log.info(self.id().split('.')[-1])
+        delattr(self.agentA, 'position')
+        self.assertRaises(AttributeError, getattr, self.agentA, 'position')
+
+    def test_angle_get_delete(self):
+        log.info(self.id().split('.')[-1])
+        self.agentA.angle = 0
+        delattr(self.agentA, 'angle')
+        self.assertRaises(AttributeError, getattr, self.agentA, 'angle')
 
 class TestGaze(unittest.TestCase):
     def setUp(self):
