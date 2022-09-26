@@ -10,7 +10,6 @@ The project follows the abstract factory design pattern, so adding a new relevan
 ![GRACE system design](docs/design.png)
 
 
-
 ## How to install
 
 Create and activate a new python environment with:
