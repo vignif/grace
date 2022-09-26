@@ -1,5 +1,11 @@
 # GRACE - GeometRic ApproaCh to mutual Engagement
 
+Python module to estimate mutual engagement given the pose in space of the relevant features of the social agents (human and robot).
+The project follows the abstract factory design pattern, so adding a new relevant feature result in inheriting from the class IFeature and implement a custom `compute` function.
+
+![GRACE system design](docs/design.png){#fig:design}
+
+[Codacy](https://app.codacy.com/gh/vignif/grace/dashboard) is used to track the quality of the code.
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/a7fa7f8f907b49479a9ca49a563fed30)](https://www.codacy.com/gh/vignif/grace/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vignif/grace&amp;utm_campaign=Badge_Grade)
 
 
