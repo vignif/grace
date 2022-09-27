@@ -41,6 +41,11 @@ eng = run_default(A, B)
 
 A wrapper for ros noetic is available at [https://github.com/vignif/grace_ros](https://github.com/vignif/grace_ros)
 
+One properly configured, the mutual engagement is retrieved by the ros topic `\mutual_engagement`.
+
+The following figure shows an example of such information.
+
+![Image](docs/mutual.png)
 ## Tests
 
 [![unittest](https://github.com/vignif/grace/actions/workflows/ci_test_grace.yml/badge.svg)](https://github.com/vignif/grace/actions/workflows/ci_test_grace.yml)
