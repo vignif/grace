@@ -221,7 +221,7 @@ def run(human, robot):
 
 
 if __name__ == "__main__":
-    run(([0, 0, 0], [0, 0, 0.5, 0.5]), ([0, 1.5, 0], [0, 0, 0, 1]))
+    run(([0, 0, 0], [0, 0, 0, 1]), ([1, 0, 0], [0, 0, 0, 1]))
 
 
 __all__ = ["Interaction", "FeatureHandler", "IFeature",
