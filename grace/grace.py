@@ -158,6 +158,7 @@ def run(human, robot):
 
 
 def animate(interaction):
+    # TODO still not stable
     mpl.rcParams['figure.figsize'] = (4, 6)
 
     plt.ion()
