@@ -7,6 +7,11 @@ Author: Francesco Vigni
 import numpy as np
 from grace.utils import Agent, Logger, animate
 from grace.features import GazeFeature, IFeature, ProximityFeature, FeatureHandler
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+
+mpl.rcParams['figure.figsize'] = (4, 6)
 
 
 log = Logger(__name__).logger
@@ -36,10 +41,8 @@ class Grace:
         self.mutual_engagement = None
         self.agents = agents
         self.fh = FeatureHandler(self.agents[0], self.agents[1])
-        self.features = []
         for feature in features:
             instance_feature = feature(self.agents[0], self.agents[1])
-            self.features.append(instance_feature)
             self.fh.add(instance_feature, 1.0)
         self.fh.compute()
 
@@ -153,6 +156,26 @@ def run(human, robot):
     # log.info(f'Engagement: {eng:.3f}')
     return eng
 
+
+def animate(interaction):
+    mpl.rcParams['figure.figsize'] = (4, 6)
+
+    plt.ion()
+    def animate(interaction: Interaction):
+        plt.gca().cla() # optionally clear axes
+
+        f1 = interaction.feature_handler.available_features[0]
+        f2 = interaction.feature_handler.available_features[1]
+        names = [f1["Feature"].name, f2["Feature"].name]
+        data = [f1["Feature"].G.value, f2["Feature"].G.value]
+
+        plt.bar(names, data)
+
+        plt.ylim([0, 1.05])
+        plt.draw()
+        plt.pause(0.1)
+
+    plt.show(block=True) # block=True lets the window stay open at the end of the animation.
 
 if __name__ == "__main__":
     run(([0, 0, 0], [0, 0, 0, 1]), ([1, 0, 0], [0, 0, 0, 1]))

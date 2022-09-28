@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from grace.grace import Interaction
+# from grace.grace import Interaction
 
 
 mpl.rcParams['figure.figsize'] = (4, 6)
 
 plt.ion()
-def animate(Int: Interaction):
+def animate(Int):
     plt.gca().cla() # optionally clear axes
 
     f1 = Int.feature_handler.available_features[0]
