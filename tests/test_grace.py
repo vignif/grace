@@ -1,17 +1,17 @@
+from grace.features import IFeature
+from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run, run_default, Grace
 import numpy as np
 import unittest
 import logging
-from grace.grace import Interaction, Agent, FeatureHandler, ProximityFeature, GazeFeature, run, run_default
+import timeit
 import os
 import sys
-os.path.join(os.path.dirname(__file__), '../')
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
-# import matplotlib.pyplot as plt
+
+os.path.join(os.path.dirname(__file__), '../grace')
+sys.path.append(os.path.join(os.path.dirname(__file__), '../grace'))
 
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
-
-# from config.log_conf import Logger
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 
@@ -27,156 +27,62 @@ quat_logger.setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
 
-# logger = logging.getLogger()
-# logger.level = logging.DEBUG
-# logger.addHandler(logging.StreamHandler(sys.stdout))
-
-
-class TestAgent(unittest.TestCase):
+class TestGrace(unittest.TestCase):
     def setUp(self):
-        self.agentA = Agent("A", [1, 2, 3], [0, 0, 0, 1])
-        self.agentB = Agent("B", [1, 2, 3], [1/np.sqrt(2), 1/np.sqrt(2), 0, 0])
-
-    def tearDown(self):
-        pass
-        # log.debug(f'deleting agent: {self.agentA.name}')
-
-    def test_str_agents(self):
-        log.info(self.id().split('.')[-1])
-        log.info(self.agentA)
-        log.info(self.agentB)
-
-    def test_quaternion_is_not_unitary(self):
-        log.info(self.id().split('.')[-1])
-        self.assertRaises(AssertionError, Agent, "C", [1, 2, 3], [0, 0, 1, 1])
-
-    def test_position_wrong(self):
-        log.info(self.id().split('.')[-1])
-        self.assertRaises(AssertionError, Agent, "C", [1, 2], [0, 0, 0, 1])
-        self.assertRaises(AssertionError, Agent, "C",
-                          [1, 2, 3, 4], [0, 0, 0, 1])
-
-    def test_wrong_arguments(self):
-        log.info(self.id().split('.')[-1])
-        self.assertRaises(ValueError, Agent, "C", [1, 2, 3], [0, 0, 0, 1], 1)
-        self.assertRaises(ValueError, Agent, "C", [
-                          1, 2, 3], [0, 0, 0, 1], 1, 1)
-
-    def test_mag_position(self):
-        log.info(self.id().split('.')[-1])
-        self.assertEqual(self.agentA.mag, np.linalg.norm(self.agentA.position))
-        self.assertEqual(self.agentB.mag, np.linalg.norm(self.agentB.position))
-
-    def test_delete_position(self):
-        log.info(self.id().split('.')[-1])
-        delattr(self.agentA, 'position')
-        self.assertRaises(AttributeError, getattr, self.agentA, 'position')
-
-    def test_angle_get_delete(self):
-        log.info(self.id().split('.')[-1])
-        self.agentA.angle = 0
-        delattr(self.agentA, 'angle')
-        self.assertRaises(AttributeError, getattr, self.agentA, 'angle')
-
-class TestGaze(unittest.TestCase):
-    def setUp(self):
+        self.A = Agent(" A", ([0, 0, 0]), ([0, 0, 0, 1]))
+        self.B = Agent(" B", ([1, 1, 0]), ([0, 0, 0, 1]))
         log.debug("creating common resources")
 
     def tearDown(self):
         log.debug("tearing down common resources")
 
-    def get_gaze_eng(self, pose_H, pose_R):
-        Human = Agent("Human", pose_H)
-        Robot = Agent("Robot", pose_R)
-        G = GazeFeature(Human, Robot)
-        F = FeatureHandler(Human, Robot)
-        F.add(G, 1.0)
-        F.compute()
-        I = Interaction(F)
-        eng = I.compute()
-        return eng
+    def test_require_agents_to_init(self):
+        self.assertRaises(AssertionError, Grace, [
+                          self.A, 2], [IFeature, IFeature])
+        self.assertRaises(AssertionError, Grace, [
+                          "other", 2], [IFeature, IFeature])
+        self.assertRaises(AssertionError, Grace, [
+                          0, self.A], [IFeature, IFeature])
 
-    def test_full_mutual_gaze(self):
+    def test_type_of_features(self):
         log.info(self.id().split('.')[-1])
-        pose_H = ([3, 2, 0]), ([0, 0, 1, 0])
-        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
-        eng = self.get_gaze_eng(pose_H, pose_R)
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertAlmostEqual(eng, 1.0, places=2)
+        self.assertRaises(AssertionError, Grace, [self.A, self.B], [
+                          ProximityFeature, Grace])
 
-    def test_only_robot_full(self):
+    def test_different_agents(self):
         log.info(self.id().split('.')[-1])
-        pose_H = ([3, 2, 0]), ([0, 0, 0, 1])
-        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
-        eng = self.get_gaze_eng(pose_H, pose_R)
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertLess(eng, 1.0)
+        self.assertRaises(ValueError, Grace, [self.A, self.A], [
+                          ProximityFeature, ProximityFeature])
 
-    def test_human_full(self):
+    def test_only_two_agents(self):
         log.info(self.id().split('.')[-1])
-        pose_H = ([3, 2, 0]), ([0, 0, 1, 0])
-        pose_R = ([0, 2, 0]), ([0, 1, 0, 0])
-        eng = self.get_gaze_eng(pose_H, pose_R)
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertLess(eng, 1.0)
+        self.assertRaises(ValueError, Grace, [self.A, self.B, self.A], [
+                          ProximityFeature, ProximityFeature])
+        self.assertRaises(ValueError, Grace, [self.A], [
+                          ProximityFeature, ProximityFeature])
 
-    def test_zero_gaze(self):
+    def test_compute(self):
         log.info(self.id().split('.')[-1])
-        pose_H = ([3, 2, 0]), ([0, 0, 0, 1])
-        pose_R = ([0, 2, 0]), ([0, 0, 1, 0])
-        eng = self.get_gaze_eng(pose_H, pose_R)
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertEqual(eng, 0.0)
+        G = Grace([self.A, self.B], [ProximityFeature, GazeFeature])
+        G.compute()
+        print()
 
-
-class TestProximity(unittest.TestCase):
-    def setUp(self):
-        log.debug("creating common resources")
-
-    def tearDown(self):
-        log.debug("tearing down common resources")
-
-    def get_prox_eng(self, pose_H, pose_R):
-        Human = Agent("Human", pose_H)
-        Robot = Agent("Robot", pose_R)
-        P = ProximityFeature(Human, Robot)
-        F = FeatureHandler(Human, Robot)
-        F.add(P, 1.0)
-        F.compute()
-        I = Interaction(F)
-        eng = I.compute()
-        return eng
-
-    def test_complete(self):
+    def test_update_params(self):
         log.info(self.id().split('.')[-1])
-        pose_H = ([1.5, 2, 0]), ([0, 0, 1, 0])
-        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
-        eng = self.get_prox_eng(pose_H, pose_R)
-        log.info(f'Engagement: {eng:.3f}')
-        self.assertAlmostEqual(eng, 1.0, places=2)
+        G = Grace([self.A, self.B], [ProximityFeature, GazeFeature])
+        eng1 = G.compute()
+        G.update(ProximityFeature, 0.5)
+        G.compute()
+        eng2 = G.compute()
+        self.assertNotEqual(eng1, eng2)
 
-    def test_varying_proxemics_xy(self):
+    def test_visualize(self):
         log.info(self.id().split('.')[-1])
-
-        pose_H = ([4, 2, 0]), ([0, 0, 1, 0])
-        pose_R = ([0, 2, 0]), ([0, 0, 0, 1])
-
-        a_pos_x = np.arange(-10.0, 10.0, 0.5)
-        engs_x = []
-        for x in a_pos_x:
-            pose_R = ([x, 6, 0]), ([0, 0, 0, 1])
-            eng = self.get_prox_eng(pose_H=pose_H, pose_R=pose_R)
-            engs_x.append(eng)
-
-        log.info(max(engs_x))
-
-    def test_same_location(self):
-        log.info(self.id().split('.')[-1])
-        pose_H = ([-2, 2, 4]), ([0, 0, 1, 0])
-        pose_R = ([-2, 2, 4]), ([0, 0, 0, 1])
-
-        self.assertRaises(ValueError, self.get_prox_eng, pose_H, pose_R)
-
+        G = Grace([self.A, self.B], [ProximityFeature, GazeFeature])
+        G.compute()
+        for i in range(20):
+            G.visualize_features()
+        
 
 class TestInteraction(unittest.TestCase):
     def setUp(self):
@@ -277,6 +183,19 @@ class TestInteraction(unittest.TestCase):
         log.info(f'Engagement: {eng:.3f}')
         self.assertAlmostEqual(eng, 1.0, places=2)
 
+    def test_time(self):
+        log.info(self.id().split('.')[-1])
+
+        eng_logger = logging.getLogger("grace.grace")
+        eng_logger.setLevel(logging.WARNING)
+
+        starttime = timeit.default_timer()
+        print("The start time is :", starttime)
+        eng = run_default(self.A, self.B)
+        log.info(f'Engagement: {eng:.3f}')
+        # self.assertAlmostEqual(eng, 1.0, places=2)
+        print("The time difference is :", timeit.default_timer() - starttime)
+
 
 class TestParameters(unittest.TestCase):
     def setUp(self):
@@ -295,6 +214,7 @@ class TestParameters(unittest.TestCase):
 
         G = GazeFeature(A, B)
         self.assertTrue(np.array_equal(G.gaze_axis, np.array([1, 0, 0])))
+
 
 #     def test_fail_on_same_location(self):
 #         log.info(self.id().split('.')[-1])
@@ -420,7 +340,5 @@ class TestParameters(unittest.TestCase):
 #         self.assertGreaterEqual(len(stats_with_same_gaze), 1)
 #         print()
 #         log.info('done')
-
-
 if __name__ == "__main__":
     unittest.main()
