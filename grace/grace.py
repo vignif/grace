@@ -5,7 +5,7 @@ Author: Francesco Vigni
 """
 
 import numpy as np
-from grace.utils import Agent, Logger, animate
+from grace.utils import Agent, Logger
 from grace.features import GazeFeature, IFeature, ProximityFeature, FeatureHandler
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -162,7 +162,7 @@ def animate(interaction):
     mpl.rcParams['figure.figsize'] = (4, 6)
 
     plt.ion()
-    def animate(interaction: Interaction):
+    def run_animation(interaction: Interaction):
         plt.gca().cla() # optionally clear axes
 
         f1 = interaction.feature_handler.available_features[0]
@@ -175,7 +175,7 @@ def animate(interaction):
         plt.ylim([0, 1.05])
         plt.draw()
         plt.pause(0.1)
-
+    run_animation(interaction)
     plt.show(block=True) # block=True lets the window stay open at the end of the animation.
 
 if __name__ == "__main__":
