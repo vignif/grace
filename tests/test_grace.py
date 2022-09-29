@@ -340,5 +340,3 @@ class TestParameters(unittest.TestCase):
 #         self.assertGreaterEqual(len(stats_with_same_gaze), 1)
 #         print()
 #         log.info('done')
-if __name__ == "__main__":
-    unittest.main()

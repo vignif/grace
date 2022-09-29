@@ -7,16 +7,6 @@ import logging.config
 os.makedirs('logs', exist_ok=True)
 
 
-def singleton(cls):
-    instances = {}
-
-    def get_instance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return get_instance()
-
-
 class Logger:
     def __init__(self, name, level=logging.DEBUG):
         self.logger = logging.getLogger(name)
