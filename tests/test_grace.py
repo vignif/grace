@@ -80,7 +80,7 @@ class TestGrace(unittest.TestCase):
         log.info(self.id().split('.')[-1])
         G = Grace([self.A, self.B], [ProximityFeature, GazeFeature])
         G.compute()
-        for i in range(20):
+        for _ in range(20):
             G.visualize_features()
         
 
@@ -113,7 +113,6 @@ class TestInteraction(unittest.TestCase):
         log.info(self.id().split('.')[-1])
         P = ProximityFeature(self.A, self.B)
         P.epsilon = np.sqrt(2)
-        G = GazeFeature(self.A, self.B)
 
         # feature handler
         F = FeatureHandler(self.A, self.B)
@@ -340,5 +339,3 @@ class TestParameters(unittest.TestCase):
 #         self.assertGreaterEqual(len(stats_with_same_gaze), 1)
 #         print()
 #         log.info('done')
-if __name__ == "__main__":
-    unittest.main()
