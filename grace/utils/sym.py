@@ -15,11 +15,13 @@ from sympy import symbols, solve, Eq, exp, lambdify
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
-import logging
 
-from .mylog import Logger
-log = Logger(__name__, logging.WARNING).logger
 
+from grace.utils import Logger
+log = Logger(__name__).logger
+
+from decimal import *
+getcontext().prec = 6
 
 x = symbols('x')
 FLOAT_PRECISION = 10
@@ -42,25 +44,33 @@ class GaussianModel:
 
         self.itx = None
         self.ity = None
-
+        
+        self.same = False
         if np.isclose(self.m1, self.m2):
             self.same_means()
 
-        if self.itx is None or self.ity is None:
-            if method == "closed":
-                self.ity = self.closed_form()
-            elif method == "standard":
-                self.itx = self.standard_form()
-                log.debug(f'itx: {self.itx}')
-                self.ity = self.get_y_val()
-            else:
-                raise ValueError("method must be 'closed' or 'standard'")
-        log.info(f'value: {self.ity}')
-        self.value = self.ity
+        self.file_path = None
+
+        try:
+            if self.itx is None or self.ity is None:
+                if method == "closed":
+                    self.ity = self.closed_form()
+                elif method == "standard":
+                    self.itx = self.standard_form()
+                    log.debug(f'itx: {self.itx}')
+                    self.ity = self.get_y_val()
+                else:
+                    raise ValueError("method must be 'closed' or 'standard'")
+            log.info(f'value: {self.ity}')
+            self.value = self.ity
+            self.precision()
+        except Exception as e:
+            log.fatal(f'Error: {e}')
 
     def same_means(self):
         self.itx = self.m1
         self.ity = 1.0
+        self.same = True
 
     def standard_form(self):
         eq = Eq(self.f1, self.f2)
@@ -74,8 +84,8 @@ class GaussianModel:
         return itx
 
     def closed_form(self):
-        # NOT USE YET
         closed_form = (self.m1**2 - self.m2**2) / (2 * (self.m1 - self.m2))
+        self.itx = -closed_form
         f = exp(-1 / 2 * (x - self.m1)**2)
         ity = f.subs(x, closed_form)
         log.debug(f'closed ity: {ity}')
@@ -92,19 +102,33 @@ class GaussianModel:
             log.warning(e)
         return ity
 
-    def plot(self, type):
+    def precision(self):
+        self.itx = round(float(self.itx), FLOAT_PRECISION)
+        self.ity = round(float(self.ity), FLOAT_PRECISION)
+        self.value = self.ity
+
+    def plot_once(self, type, path=None):
         point_of_intersection = [self.itx, self.ity]
         xx = np.linspace(-10 + int(self.itx), 10 + int(self.itx), 1000)
         yy = lambdify(x, [self.f1, self.f2])(xx)
         plt.plot(xx, np.transpose(yy))
         plt.scatter(*point_of_intersection)
-        if type == 'screen':
+        self.file_path = path + '/gauss_result.png'
+        if type == "screen":
             plt.show()
-        elif type == 'file':
-            plt.savefig('gauss_result.png')
+        elif type == "file":
+            plt.savefig(self.file_path)
         else:
-            plt.savefig('gauss_result.png')
+            plt.savefig(self.file_path)
             plt.show()
+
+    def plot_continuous(self):
+        pass
+
+    def __eq__(self, __o: object) -> bool:
+        if not isinstance(__o, GaussianModel):
+            return NotImplemented
+        return self.itx == __o.itx and self.ity == __o.ity
 
 
 if __name__ == '__main__':
@@ -135,4 +159,4 @@ if __name__ == '__main__':
     log.debug(f'mean2: {m2}')
     G = GaussianModel(m1, m2)
 
-    # G.plot(type=plot_type)
+    # G.plot_once(type=plot_type)

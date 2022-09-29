@@ -2,6 +2,11 @@ import numpy as np
 from math import atan2, sin, cos
 
 
+def angle2shift(sign, val):
+    k = 10  # constant to stretch the tan
+    return sign * k * np.tan(val / 4)
+    
+
 def angle_between_vectors(v1, v2):
     """Returns the angle in radians between vectors 'v1' and 'v2'::
     >>> angle_between((1, 0, 0), (0, 1, 0))
