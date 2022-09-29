@@ -28,7 +28,6 @@ class Grace:
             for feature in features:
                 assert feature is not None, "features must be a list of IFeature objects"
                 assert issubclass(feature, IFeature)
-                pass
         except AssertionError:
             raise AssertionError("All features must be of type IFeature")
 

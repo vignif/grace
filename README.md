@@ -9,7 +9,6 @@ The project follows the abstract factory design pattern, so adding a new relevan
 
 ![GRACE system design](docs/design.png)
 
-
 ## How to install
 
 Create and activate a new python environment with:
@@ -28,7 +27,7 @@ pip setup.py install
 
 ## Minimal usage example
 
-```
+```python3
 from grace import Agent, run_default
 
 # The second argument of Agent is the position and orientation (quaternion) of the agent wrt the world
